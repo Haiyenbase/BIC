@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPT MiniMBA 2026 — 8 Ý Tưởng BIC</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg2: #111827;
+  --bg3: #1a2235;
+  --border: rgba(255,255,255,0.08);
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --accent: #f97316;
+  --accent2: #3b82f6;
+  --accent3: #10b981;
+  --accent4: #8b5cf6;
+  --gold: #f59e0b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #0f1a2e 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 48px 40px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: 200px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.badge {
+  display: inline-block;
+  background: rgba(249,115,22,0.15);
+  border: 1px solid rgba(249,115,22,0.3);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+.header h1 span { color: var(--accent); }
+.header p {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
+}
+.stats-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 32px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+}
+.stat-num span { color: var(--accent); }
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+/* LEGEND */
+.legend {
+  display: flex;
+  gap: 24px;
+  padding: 16px 40px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* FILTER */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 20px 40px;
+  overflow-x: auto;
+}
+.filter-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: rgba(249,115,22,0.15);
+  border-color: rgba(249,115,22,0.4);
+  color: var(--accent);
+}
+
+/* CARDS GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 0 40px;
+}
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.15);
+}
+.card.hidden { display: none; }
+
+.card-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.card-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.card-sub {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.tag-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.tag-b2c { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+.tag-b2b { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+.tag-b2g { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+.tag-ai { background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.25); }
+.tag-platform { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+.tag-saas { background: rgba(236,72,153,0.12); color: #f472b6; border: 1px solid rgba(236,72,153,0.25); }
+
+.card-body { padding: 20px 24px; }
+
+/* SCORES */
+.scores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.score-item {
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.score-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.score-stars { font-size: 13px; line-height: 1; }
+.score-val {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* SECTIONS */
+.section { margin-bottom: 16px; }
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.pro-con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pro-list, .con-list { display: flex; flex-direction: column; gap: 5px; }
+.pro-item, .con-item {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 5px 8px 5px 20px;
+  border-radius: 6px;
+  position: relative;
+  line-height: 1.4;
+}
+.pro-item { background: rgba(16,185,129,0.06); border-left: 2px solid rgba(16,185,129,0.3); }
+.con-item { background: rgba(239,68,68,0.06); border-left: 2px solid rgba(239,68,68,0.3); }
+.pro-item::before { content: '+'; position: absolute; left: 7px; color: #10b981; font-weight: 700; font-size: 13px; }
+.con-item::before { content: '−'; position: absolute; left: 7px; color: #ef4444; font-weight: 700; font-size: 13px; }
+
+.units-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.unit-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.revenue-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.revenue-main {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+.revenue-sub { font-size: 11px; color: var(--muted); }
+
+.verdict {
+  background: rgba(249,115,22,0.06);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  font-style: italic;
+}
+.verdict strong { color: var(--accent); font-style: normal; }
+
+/* COMPARISON TABLE */
+.table-section {
+  padding: 40px 40px 0;
+  margin-bottom: 32px;
+}
+.table-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.table-title span { color: var(--accent); }
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.comp-table th {
+  background: var(--bg3);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.comp-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+.comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+.comp-table .idea-name { font-weight: 600; font-size: 13px; }
+.comp-table .idea-sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+.stars-cell { color: var(--gold); letter-spacing: 2px; font-size: 13px; }
+.rec-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.rec-top { background: rgba(249,115,22,0.2); color: var(--accent); border: 1px solid rgba(249,115,22,0.4); }
+.rec-mid { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.rec-low { background: rgba(107,114,128,0.15); color: var(--muted); border: 1px solid rgba(107,114,128,0.3); }
+
+.section-spacer { height: 32px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="badge">FPT MiniMBA 2026 · BIC Project</div>
+  <h1>8 Ý Tưởng <span>Đột Phá</span><br>Cho Nhóm Đa Đơn Vị</h1>
+  <p>Tổng hợp · So sánh · Đánh giá tính khả thi</p>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">Ý tưởng</div></div>
+    <div class="stat"><div class="stat-num"><span>0</span>/84</div><div class="stat-label">Trùng đề tài cũ</div></div>
+    <div class="stat"><div class="stat-num">4</div><div class="stat-label">Đơn vị tham gia</div></div>
+    <div class="stat"><div class="stat-num"><span>3</span></div><div class="stat-label">Hướng BIC</div></div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:#10b981"></div> B2C</div>
+  <div class="legend-item"><div class="dot" style="background:#60a5fa"></div> B2B</div>
+  <div class="legend-item"><div class="dot" style="background:#a78bfa"></div> B2G</div>
+  <div class="legend-item"><div class="dot" style="background:#fb923c"></div> AI Core</div>
+  <div class="legend-item"><div class="dot" style="background:#fbbf24"></div> Platform</div>
+  <div class="legend-item"><div class="dot" style="background:#f472b6"></div> SaaS</div>
+  <span style="margin-left:auto;font-size:11px;color:#6b7280">★ = 1 điểm · Tối đa 5★ mỗi tiêu chí</span>
+</div>
+
+<!-- FILTER -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterCards('all')">Tất cả (8)</button>
+  <button class="filter-btn" onclick="filterCards('b2c')">B2C</button>
+  <button class="filter-btn" onclick="filterCards('b2b')">B2B</button>
+  <button class="filter-btn" onclick="filterCards('ai')">AI Core</button>
+  <button class="filter-btn" onclick="filterCards('platform')">Platform</button>
+  <button class="filter-btn" onclick="filterCards('nhanh')">Nhanh ra tiền (≤1 năm)</button>
+</div>
+
+<div class="section-spacer"></div>
+
+<!-- CARDS -->
+<div class="grid" id="cards-grid">
+
+  <!-- CARD 1 -->
+  <div class="card" data-tags="b2b ai saas nhanh">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 01</div>
+      <div class="card-title">FPT AI Revenue Engine</div>
+      <div class="card-sub">Gói dịch vụ AI tích hợp giúp DN VN tăng doanh thu trong 90 ngày</div>
+      <div class="tag-row">
+        <span class="tag tag-b2b">B2B</span>
+        <span class="tag tag-ai">AI Core</span>
+        <span class="tag tag-saas">SaaS</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★☆☆</div>
+          <div class="score-val" style="color:#f59e0b">3/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★☆☆</div>
+          <div class="score-val" style="color:#f59e0b">3/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">FSoft đóng gói AI thành 3 module bán ngay: <strong style="color:var(--text)">AI Sales Copilot</strong> (phân tích lead, dự báo doanh thu), <strong style="color:var(--text)">AI Customer Retention</strong> (phát hiện khách sắp rời 30 ngày trước), <strong style="color:var(--text)">AI Pricing Engine</strong> (tối ưu giá real-time). Bán qua kênh quan hệ Ftel/Base sẵn có.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">Không cần build platform mới</div>
+            <div class="pro-item">FSoft đã có AI engine sẵn</div>
+            <div class="pro-item">Kênh bán hàng B2B sẵn có</div>
+            <div class="pro-item">ROI đo được rõ ràng cho KH</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Cạnh tranh từ AWS, Google AI</div>
+            <div class="con-item">Cần customization từng ngành</div>
+            <div class="con-item">Độ mới chưa cao ở cấp độ ý tưởng</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">FSoft — AI build</span>
+          <span class="unit-chip">Ftel — Phân phối</span>
+          <span class="unit-chip">Base — Vận hành</span>
+          <span class="unit-chip">FRT — Đầu cuối</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">60–120 tỷ/năm</div>
+          <div class="revenue-sub">50 khách × 50–200 triệu/tháng · Bắt đầu tháng 3–6</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Ý tưởng thực thi nhất, ra tiền nhanh nhất. Phù hợp nếu nhóm muốn đề tài dễ bảo vệ và có số liệu cụ thể. Hạn chế: không đủ "wow factor" để đứng đầu cuộc thi.</div>
+    </div>
+  </div>
+
+  <!-- CARD 2 -->
+  <div class="card" data-tags="b2c b2b platform nhanh">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 02</div>
+      <div class="card-title">FPT Ecosystem Monetization</div>
+      <div class="card-sub">Kích hoạt 10 triệu khách hàng Ftel thành hệ sinh thái chi tiêu số</div>
+      <div class="tag-row">
+        <span class="tag tag-b2c">B2C</span>
+        <span class="tag tag-b2b">B2B</span>
+        <span class="tag tag-platform">Platform</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">Biến app Ftel thành Superapp 2 lớp: <strong style="color:var(--text)">Lớp 1</strong> — Loyalty cross-sell: điểm thưởng dùng xuyên FPT (FRT, Education, dịch vụ số). <strong style="color:var(--text)">Lớp 2</strong> — Partner marketplace: hoa hồng từ điện, nước, bảo hiểm, siêu thị. Tận dụng 10 triệu thuê bao Ftel đang ngủ quên.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">10M user sẵn có — không cần CAC</div>
+            <div class="pro-item">Grab mất 5 năm xây — FPT có ngay</div>
+            <div class="pro-item">Nhiều nguồn doanh thu xếp chồng</div>
+            <div class="pro-item">Scale tự nhiên theo lượng user</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Cần tích hợp kỹ thuật phức tạp</div>
+            <div class="con-item">Cạnh tranh MoMo, ZaloPay, Grab</div>
+            <div class="con-item">Khó giữ user engage ngoài internet</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">Ftel — User base</span>
+          <span class="unit-chip">FRT — Cross-sell</span>
+          <span class="unit-chip">FSoft — AI engine</span>
+          <span class="unit-chip">Base — Vận hành</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">200–400 tỷ/năm</div>
+          <div class="revenue-sub">Kích hoạt 5% tệp KH · Bắt đầu tháng 6–9</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Quy mô thị trường lớn nhất trong 8 ý tưởng. Tận dụng tài sản FPT đang ngủ quên. Rủi ro chính là cạnh tranh với superapp đã established. Đề tài có tính thực tiễn cao, dễ thuyết phục BGK.</div>
+    </div>
+  </div>
+
+  <!-- CARD 3 -->
+  <div class="card" data-tags="b2b ai platform">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 03</div>
+      <div class="card-title">FPT Agentic Workforce</div>
+      <div class="card-sub">Đội nhân viên AI thay thế công việc lặp — xuất khẩu ra SEA</div>
+      <div class="tag-row">
+        <span class="tag tag-b2b">B2B</span>
+        <span class="tag tag-ai">AI Core</span>
+        <span class="tag tag-platform">Platform</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★★☆☆</div>
+          <div class="score-val" style="color:#f59e0b">3/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★★☆☆</div>
+          <div class="score-val" style="color:#f59e0b">3/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">Xây "đội AI Agent" tự động vận hành quy trình lặp (report, test, data entry, support). Thí điểm nội bộ FPT → tiết kiệm 30–40% vận hành → đóng gói bán "AI Agent as a Service" cho 300K DN VN → xuất khẩu SEA. FPT là proof of concept sống.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">Xu hướng toàn cầu 2025–2027</div>
+            <div class="pro-item">FPT vừa build vừa là KH đầu tiên</div>
+            <div class="pro-item">Chưa ai làm bài bản tại VN/SEA</div>
+            <div class="pro-item">Scale vô hạn — subscription model</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Cần 12–18 tháng build thực sự</div>
+            <div class="con-item">Kỹ thuật phức tạp, rủi ro cao</div>
+            <div class="con-item">Thị trường VN chưa sẵn sàng mua</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">FSoft — AI Agent build</span>
+          <span class="unit-chip">Base — Process mapping</span>
+          <span class="unit-chip">Ftel — Infra cloud</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">Tiết kiệm 200+ tỷ nội bộ</div>
+          <div class="revenue-sub">+ Doanh thu SaaS từ năm 2–3 · Model: per-agent per-month</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Ý tưởng "wow" nhất, phù hợp nhất với xu hướng toàn cầu. Rủi ro: quá mới so với thị trường VN hiện tại, BGK có thể hoài nghi về tính khả thi ngắn hạn. Cần narrative thuyết phục về lộ trình.</div>
+    </div>
+  </div>
+
+  <!-- CARD 4 -->
+  <div class="card" data-tags="b2b b2g ai platform">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 04</div>
+      <div class="card-title">FPT Physical AI Hub</div>
+      <div class="card-sub">Robot + AI vật lý cho nhà máy, logistics, y tế VN</div>
+      <div class="tag-row">
+        <span class="tag tag-b2b">B2B</span>
+        <span class="tag tag-b2g">B2G</span>
+        <span class="tag tag-ai">AI Core</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★☆☆☆</div>
+          <div class="score-val" style="color:#ef4444">2/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★☆☆☆</div>
+          <div class="score-val" style="color:#ef4444">2/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">FPT tích hợp robot + AI vision + IoT cho môi trường vật lý. FRT cung thiết bị/sensor, FSoft xây AI điều khiển, Ftel kết nối 5G/IoT, Base lo hợp đồng. 3 thị trường ưu tiên: kho vận logistics, nhà máy FDI (Samsung/LG/Intel), bệnh viện tư nhân.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">White space thực sự — không đối thủ nội địa</div>
+            <div class="pro-item">10.000+ nhà máy FDI đang cần gấp</div>
+            <div class="pro-item">Thị trường tỷ đô trong 5 năm tới</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Đầu tư ban đầu cực lớn (R&D, phần cứng)</div>
+            <div class="con-item">FRT chưa có kinh nghiệm robot</div>
+            <div class="con-item">Chu kỳ bán hàng B2B dài 6–18 tháng</div>
+            <div class="con-item">Cạnh tranh với vendor Nhật/Hàn/TQ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">FRT — Thiết bị, sensor</span>
+          <span class="unit-chip">FSoft — AI/CV</span>
+          <span class="unit-chip">Ftel — IoT 5G</span>
+          <span class="unit-chip">Base — Hợp đồng</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">50–200 tỷ/dự án</div>
+          <div class="revenue-sub">+ Subscription vận hành robot hàng tháng · Năm 2–3 mới ổn định</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Tầm nhìn dài hạn xuất sắc nhưng khó triển khai trong khung thời gian BIC. Phù hợp như đề tài chiến lược 5 năm hơn là kế hoạch kinh doanh 1 năm. Cần thu hẹp scope xuống 1 ngành cụ thể.</div>
+    </div>
+  </div>
+
+  <!-- CARD 5 -->
+  <div class="card" data-tags="b2b ai saas">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 05</div>
+      <div class="card-title">FPT Knowledge Brain</div>
+      <div class="card-sub">Bách khoa toàn thư sống + insight thực chiến từ 45.000 nhân viên FPT</div>
+      <div class="tag-row">
+        <span class="tag tag-b2b">B2B</span>
+        <span class="tag tag-ai">AI Core</span>
+        <span class="tag tag-saas">SaaS</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★★☆☆</div>
+          <div class="score-val" style="color:#f59e0b">3/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">AI tổng hợp tri thức thực chiến từ nhân viên FPT (micro-knowledge, kinh nghiệm dự án, bài học thất bại). Gamification để khuyến khích đóng góp. Nhân viên mới tra cứu như Google nội bộ. Sau đó bán ra ngoài như "Enterprise Knowledge Platform" cho tập đoàn VN.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">45K nhân viên = kho tri thức khổng lồ</div>
+            <div class="pro-item">Giải quyết pain point thực tế nội bộ</div>
+            <div class="pro-item">Validate nội bộ trước — zero risk</div>
+            <div class="pro-item">Sau đó bán ra ngoài dễ dàng</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Khó thay đổi thói quen nhân viên chia sẻ</div>
+            <div class="con-item">Cần kiểm duyệt nội dung nhạy cảm</div>
+            <div class="con-item">Notion AI, Confluence đang làm điều tương tự</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">FSoft — AI engine</span>
+          <span class="unit-chip">Base — Platform, HR</span>
+          <span class="unit-chip">Ftel — Hạ tầng</span>
+          <span class="unit-chip">FRT — Thiết bị</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">Tiết kiệm onboarding 30%</div>
+          <div class="revenue-sub">+ SaaS B2B 50–200tr/tháng/DN từ năm 2 · Thị trường: 500+ tập đoàn lớn VN</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Ý tưởng thực tế, giải quyết đúng pain point. Điểm mạnh là có thể validate miễn phí ngay trong FPT. Cần differentiation rõ ràng so với Confluence/Notion AI để thuyết phục BGK.</div>
+    </div>
+  </div>
+
+  <!-- CARD 6 -->
+  <div class="card" data-tags="b2c platform nhanh">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 06</div>
+      <div class="card-title">FPT Smart Home as a Service</div>
+      <div class="card-sub">Gói nhà thông minh trọn gói subscription — FRT + Ftel + FSoft gộp làm 1</div>
+      <div class="tag-row">
+        <span class="tag tag-b2c">B2C</span>
+        <span class="tag tag-platform">Platform</span>
+        <span class="tag tag-saas">SaaS</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">Không bán thiết bị — bán <strong style="color:var(--text)">trải nghiệm trọn gói</strong> 2–5 triệu/tháng: FRT lắp đặt IoT (camera, khóa, đèn, điều hòa), Ftel đảm bảo kết nối, FSoft AI học thói quen gia đình & tối ưu điện năng. Bảo hành + bảo trì + nâng cấp thiết bị included.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">FPT duy nhất có đủ 3 mảnh ghép</div>
+            <div class="pro-item">Recurring revenue ổn định</div>
+            <div class="pro-item">Thị trường smart home VN đang bùng nổ</div>
+            <div class="pro-item">Upsell tự nhiên qua kênh Ftel/FRT</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Chi phí lắp đặt ban đầu cao</div>
+            <div class="con-item">Cần đội kỹ thuật lắp đặt lớn</div>
+            <div class="con-item">Xiaomi, Tuya đang chiếm thị trường phổ thông</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">FRT — Thiết bị + lắp đặt</span>
+          <span class="unit-chip">Ftel — Kết nối</span>
+          <span class="unit-chip">FSoft — AI hub</span>
+          <span class="unit-chip">Base — Billing</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">360 tỷ/năm</div>
+          <div class="revenue-sub">10.000 hộ × 3 triệu/tháng · Tăng trưởng compound mỗi năm</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Ý tưởng cân bằng nhất — vừa mới, vừa khả thi, vừa có doanh thu rõ ràng. Tận dụng đúng thế mạnh đa đơn vị. Cần focus vào phân khúc cao cấp để tránh cạnh tranh giá với Xiaomi.</div>
+    </div>
+  </div>
+
+  <!-- CARD 7 -->
+  <div class="card" data-tags="b2b b2c platform">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 07</div>
+      <div class="card-title">FPT Global Talent Exchange</div>
+      <div class="card-sub">Nền tảng xuất khẩu nhân lực tech VN ra thị trường thiếu hụt toàn cầu</div>
+      <div class="tag-row">
+        <span class="tag tag-b2b">B2B</span>
+        <span class="tag tag-b2c">B2C</span>
+        <span class="tag tag-platform">Platform</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★★☆☆</div>
+          <div class="score-val" style="color:#f59e0b">3/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★★☆☆</div>
+          <div class="score-val" style="color:#f59e0b">3/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★★★</div>
+          <div class="score-val" style="color:#10b981">5/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">Platform 2 chiều: DN Nhật/Đức/Úc đăng nhu cầu → AI match ứng viên VN → FPT Education upskill → hỗ trợ visa & relocation. Employer of Record: FPT đứng tên thuê rồi cho thuê lại. Nhật thiếu 800K IT engineer 2030, Đức thiếu 137K.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">Thị trường toàn cầu tỷ đô</div>
+            <div class="pro-item">FPT đã có uy tín quốc tế sẵn</div>
+            <div class="pro-item">200K sinh viên IT/năm — nguồn cung dồi dào</div>
+            <div class="pro-item">3 nguồn doanh thu độc lập</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Cần giải quyết pháp lý visa phức tạp</div>
+            <div class="con-item">Cạnh tranh LinkedIn, TopCV, Navigos</div>
+            <div class="con-item">Chu kỳ bán hàng dài, phụ thuộc đối tác quốc tế</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">FSoft — Uy tín quốc tế</span>
+          <span class="unit-chip">FPT Education — Upskill</span>
+          <span class="unit-chip">Base — HR platform</span>
+          <span class="unit-chip">FSoft AI — Matching</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">15–20% lương năm đầu/ứng viên</div>
+          <div class="revenue-sub">+ Phí upskilling + EOR monthly fee · Thị trường: Nhật, Đức, Úc, UAE</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Tầm nhìn chiến lược tốt nhưng thực thi phức tạp nhất trong 8 ý. Phù hợp hơn cho Option 2 (Chiến lược tăng trưởng) thay vì Option 1. Cần thu hẹp xuống 1 thị trường (Nhật) để BIC có tính khả thi.</div>
+    </div>
+  </div>
+
+  <!-- CARD 8 -->
+  <div class="card" data-tags="b2c b2b ai saas nhanh">
+    <div class="card-header">
+      <div class="card-num">Ý tưởng 08</div>
+      <div class="card-title">FPT AI FinCoach</div>
+      <div class="card-sub">Cố vấn tài chính AI cá nhân cho 45K nhân viên FPT & thị trường đại chúng VN</div>
+      <div class="tag-row">
+        <span class="tag tag-b2c">B2C</span>
+        <span class="tag tag-b2b">B2B</span>
+        <span class="tag tag-ai">AI Core</span>
+        <span class="tag tag-saas">SaaS</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="scores">
+        <div class="score-item">
+          <div class="score-label">Khả thi</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Nhanh tiền</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Độ mới</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Quy mô TT</div>
+          <div class="score-stars">★★★★☆</div>
+          <div class="score-val" style="color:#10b981">4/5</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Mô tả chi tiết</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">AI coach tài chính cá nhân hóa: kết nối tài khoản ngân hàng → phân tích thói quen chi tiêu thực tế → đề xuất kế hoạch tiết kiệm/đầu tư → tích hợp sản phẩm tài chính đối tác (bảo hiểm, quỹ). Thí điểm 45K nhân viên FPT → mở rộng 50M user VN.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ưu & Nhược điểm</div>
+        <div class="pro-con-grid">
+          <div class="pro-list">
+            <div class="pro-item">45K nhân viên FPT = sandbox miễn phí</div>
+            <div class="pro-item">70% người VN không có kế hoạch tài chính</div>
+            <div class="pro-item">3 nguồn thu: sub + hoa hồng + B2B HR</div>
+            <div class="pro-item">Low cost to build — AI + data sẵn có</div>
+          </div>
+          <div class="con-list">
+            <div class="con-item">Cần giấy phép tư vấn tài chính (pháp lý)</div>
+            <div class="con-item">Cạnh tranh Finhay, Momo, VNPAY</div>
+            <div class="con-item">Người VN nhạy cảm với data tài chính cá nhân</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Đơn vị tham gia</div>
+        <div class="units-row">
+          <span class="unit-chip">FSoft — AI engine</span>
+          <span class="unit-chip">Base — HR/payroll data</span>
+          <span class="unit-chip">Ftel — Infra</span>
+          <span class="unit-chip">FRT — POS data</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Doanh thu ước tính</div>
+        <div class="revenue-box">
+          <div class="revenue-main">50–100K/tháng/user</div>
+          <div class="revenue-sub">+ Hoa hồng sản phẩm tài chính + B2B HR benefit · 50M user tiềm năng</div>
+        </div>
+      </div>
+
+      <div class="verdict"><strong>Verdict:</strong> Ý tưởng cân bằng tốt giữa độ mới và khả thi. Điểm yếu chính là rào cản pháp lý tài chính. Nếu định vị là "financial wellness" thay vì "tư vấn đầu tư" thì tránh được vấn đề license.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- COMPARISON TABLE -->
+<div class="table-section" style="margin-top:48px;">
+  <div class="table-title">Bảng So Sánh <span>Tổng Hợp</span></div>
+  <div style="overflow-x:auto">
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Ý tưởng</th>
+        <th>Khả thi</th>
+        <th>Nhanh tiền</th>
+        <th>Độ mới</th>
+        <th>Quy mô TT</th>
+        <th>Tổng</th>
+        <th>Khuyến nghị</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>02</td>
+        <td><div class="idea-name">Ecosystem Monetization</div><div class="idea-sub">Superapp 10M khách Ftel</div></td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★★</td>
+        <td style="font-weight:700;color:#f59e0b;font-size:16px">17/20</td>
+        <td><span class="rec-badge rec-top">🏆 Top Pick</span></td>
+      </tr>
+      <tr>
+        <td>06</td>
+        <td><div class="idea-name">Smart Home as a Service</div><div class="idea-sub">Subscription nhà thông minh</div></td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td style="font-weight:700;color:#f59e0b;font-size:16px">16/20</td>
+        <td><span class="rec-badge rec-top">🏆 Top Pick</span></td>
+      </tr>
+      <tr>
+        <td>08</td>
+        <td><div class="idea-name">AI FinCoach</div><div class="idea-sub">Cố vấn tài chính AI</div></td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td style="font-weight:700;color:#f59e0b;font-size:16px">16/20</td>
+        <td><span class="rec-badge rec-top">🏆 Top Pick</span></td>
+      </tr>
+      <tr>
+        <td>01</td>
+        <td><div class="idea-name">AI Revenue Engine</div><div class="idea-sub">Gói AI B2B 90 ngày</div></td>
+        <td class="stars-cell">★★★★★</td>
+        <td class="stars-cell">★★★★★</td>
+        <td class="stars-cell">★★★</td>
+        <td class="stars-cell">★★★</td>
+        <td style="font-weight:700;color:#60a5fa;font-size:16px">16/20</td>
+        <td><span class="rec-badge rec-mid">✅ Khả thi nhất</span></td>
+      </tr>
+      <tr>
+        <td>05</td>
+        <td><div class="idea-name">Knowledge Brain</div><div class="idea-sub">Bách khoa thư nhân viên</div></td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td style="font-weight:700;color:#60a5fa;font-size:16px">15/20</td>
+        <td><span class="rec-badge rec-mid">✅ Solid</span></td>
+      </tr>
+      <tr>
+        <td>03</td>
+        <td><div class="idea-name">Agentic Workforce</div><div class="idea-sub">Đội AI agent thay nhân viên</div></td>
+        <td class="stars-cell">★★★</td>
+        <td class="stars-cell">★★★</td>
+        <td class="stars-cell">★★★★★</td>
+        <td class="stars-cell">★★★★★</td>
+        <td style="font-weight:700;color:#60a5fa;font-size:16px">16/20</td>
+        <td><span class="rec-badge rec-mid">🚀 Ambitious</span></td>
+      </tr>
+      <tr>
+        <td>07</td>
+        <td><div class="idea-name">Global Talent Exchange</div><div class="idea-sub">Xuất khẩu nhân lực tech</div></td>
+        <td class="stars-cell">★★★</td>
+        <td class="stars-cell">★★★</td>
+        <td class="stars-cell">★★★★</td>
+        <td class="stars-cell">★★★★★</td>
+        <td style="font-weight:700;color:#6b7280;font-size:16px">15/20</td>
+        <td><span class="rec-badge rec-low">⚠️ Thu hẹp scope</span></td>
+      </tr>
+      <tr>
+        <td>04</td>
+        <td><div class="idea-name">Physical AI Hub</div><div class="idea-sub">Robot + AI vật lý nhà máy</div></td>
+        <td class="stars-cell">★★</td>
+        <td class="stars-cell">★★</td>
+        <td class="stars-cell">★★★★★</td>
+        <td class="stars-cell">★★★★★</td>
+        <td style="font-weight:700;color:#6b7280;font-size:16px">14/20</td>
+        <td><span class="rec-badge rec-low">⚠️ Dài hạn 5 năm+</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div style="padding:32px 40px 0">
+  <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.2);border-radius:14px;padding:24px 28px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:12px">💡 Gợi ý chiến lược cho nhóm</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7">Với nhóm đa đơn vị (Base + FRT + Ftel + FSoft) và kỳ vọng doanh thu trong <strong style="color:var(--text)">1 năm</strong>, top 3 đề xuất là: <strong style="color:var(--accent)">#02 Ecosystem Monetization</strong> (quy mô lớn nhất, tài sản sẵn có), <strong style="color:var(--accent)">#06 Smart Home as a Service</strong> (cân bằng giữa mới và khả thi, tận dụng đúng 3 đơn vị), hoặc <strong style="color:var(--accent)">#08 AI FinCoach</strong> (thị trường 50M người, nếu định vị là financial wellness tránh rào cản pháp lý). Nếu muốn đề tài "gây wow" nhất ban giám khảo: chọn <strong style="color:var(--accent)">#03 Agentic Workforce</strong> — nhưng cần narrative thuyết phục về lộ trình 12 tháng đầu.</p>
+  </div>
+</div>
+
+<script>
+function filterCards(tag) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.card').forEach(card => {
+    if (tag === 'all') {
+      card.classList.remove('hidden');
+    } else {
+      const tags = card.dataset.tags || '';
+      card.classList.toggle('hidden', !tags.includes(tag));
+    }
+  });
+}
+</script>
+
+<!-- ======== TRANG 2: BẢNG SO SÁNH TỔNG HỢP ======== -->
+<div style="background:#fff;margin-top:48px;padding:48px 40px;border-top:4px solid #f97316">
+  <div style="font-family:'Be Vietnam Pro',sans-serif">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f97316;margin-bottom:6px">Trang 2 · Bảng So Sánh</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:#111;line-height:1.2">So Sánh <span style="color:#f97316">Tổng Hợp</span> 8 Ý Tưởng</h2>
+        <p style="font-size:13px;color:#6b7280;margin-top:6px">FPT MiniMBA 2026 · BIC Project · Nhóm đa đơn vị Base + FRT + Ftel + FSoft</p>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:860px">
+      <thead>
+        <tr style="background:#f8f7f4">
+          <th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:1px;text-transform:uppercase;border:0.5px solid #e5e3dc;width:130px">Tiêu chí</th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc">01<br><span style="font-weight:500;text-transform:none;letter-spacing:0">AI Revenue Engine</span></th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc;background:#fff8f0">02<br><span style="font-weight:500;text-transform:none;letter-spacing:0;color:#f97316">Ecosystem Monetization</span></th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc">03<br><span style="font-weight:500;text-transform:none;letter-spacing:0">Agentic Workforce</span></th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc">04<br><span style="font-weight:500;text-transform:none;letter-spacing:0">Physical AI Hub</span></th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc">05<br><span style="font-weight:500;text-transform:none;letter-spacing:0">Knowledge Brain</span></th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc;background:#fff8f0">06<br><span style="font-weight:500;text-transform:none;letter-spacing:0;color:#f97316">Smart Home SaaS</span></th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc">07<br><span style="font-weight:500;text-transform:none;letter-spacing:0">Global Talent</span></th>
+          <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.5px;border:0.5px solid #e5e3dc;background:#fff8f0">08<br><span style="font-weight:500;text-transform:none;letter-spacing:0;color:#f97316">AI FinCoach</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#f8f7f4"><td colspan="9" style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:1px;text-transform:uppercase;border:0.5px solid #e5e3dc">Điểm đánh giá (/ 5)</td></tr>
+        <tr>
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Khả thi</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FAEEDA;color:#633806;font-weight:700">3 ★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FCEBEB;color:#791F1F;font-weight:700">2 ★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FAEEDA;color:#633806;font-weight:700">3 ★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+        </tr>
+        <tr style="background:#fafaf9">
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Nhanh ra tiền</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FAEEDA;color:#633806;font-weight:700">3 ★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FCEBEB;color:#791F1F;font-weight:700">2 ★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FAEEDA;color:#633806;font-weight:700">3 ★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FAEEDA;color:#633806;font-weight:700">3 ★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+        </tr>
+        <tr>
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Độ mới</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FAEEDA;color:#633806;font-weight:700">3 ★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+        </tr>
+        <tr style="background:#fafaf9">
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Quy mô TT</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#FAEEDA;color:#633806;font-weight:700">3 ★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700">5 ★★★★★</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;background:#EAF3DE;color:#27500A;font-weight:700;border-left:2px solid #f97316">4 ★★★★</td>
+        </tr>
+        <tr style="background:#f0f9f0">
+          <td style="padding:10px 12px;border:0.5px solid #e5e3dc;font-size:12px;font-weight:700;color:#111">Tổng điểm</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:16px;font-weight:700;color:#185FA5">16/20</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:18px;font-weight:700;color:#f97316;border-left:2px solid #f97316">17/20</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:16px;font-weight:700;color:#534AB7">16/20</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:16px;font-weight:700;color:#888780">14/20</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:16px;font-weight:700;color:#185FA5">15/20</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:18px;font-weight:700;color:#f97316;border-left:2px solid #f97316">16/20</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:16px;font-weight:700;color:#888780">15/20</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:18px;font-weight:700;color:#f97316;border-left:2px solid #f97316">16/20</td>
+        </tr>
+
+        <tr style="background:#f8f7f4"><td colspan="9" style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:1px;text-transform:uppercase;border:0.5px solid #e5e3dc">Thông tin triển khai</td></tr>
+        <tr>
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Bắt đầu có tiền</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600">Tháng 3–6</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600;border-left:2px solid #f97316">Tháng 6–9</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600">Năm 2–3</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FCEBEB;color:#791F1F;font-weight:600">Năm 2–3</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600">Tháng 9–12</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600;border-left:2px solid #f97316">Tháng 6–9</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600">Năm 1–2</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600;border-left:2px solid #f97316">Tháng 6–9</td>
+        </tr>
+        <tr style="background:#fafaf9">
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Độ phức tạp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600;border-left:2px solid #f97316">Trung bình</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FCEBEB;color:#791F1F;font-weight:600">Cao</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FCEBEB;color:#791F1F;font-weight:600">Rất cao</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600;border-left:2px solid #f97316">Trung bình</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FCEBEB;color:#791F1F;font-weight:600">Cao</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600;border-left:2px solid #f97316">Trung bình</td>
+        </tr>
+        <tr>
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Rủi ro pháp lý</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600;border-left:2px solid #f97316">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#EAF3DE;color:#27500A;font-weight:600;border-left:2px solid #f97316">Thấp</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600">Trung bình</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:11px;background:#FAEEDA;color:#633806;font-weight:600;border-left:2px solid #f97316">Trung bình</td>
+        </tr>
+        <tr style="background:#fafaf9">
+          <td style="padding:9px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:500;color:#374151">Doanh thu ước tính</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#374151;font-weight:600">60–120 tỷ/năm</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#f97316;font-weight:700;border-left:2px solid #f97316">200–400 tỷ/năm</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#374151;font-weight:600">200+ tỷ tiết kiệm + SaaS năm 2</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#374151;font-weight:600">50–200 tỷ/dự án</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#374151;font-weight:600">SaaS 50–200 tr/tháng/DN</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#f97316;font-weight:700;border-left:2px solid #f97316">360 tỷ/năm</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#374151;font-weight:600">15–20% lương/ứng viên + EOR</td>
+          <td style="padding:9px 8px;border:0.5px solid #e5e3dc;text-align:center;font-size:10px;color:#374151;font-weight:600;border-left:2px solid #f97316">50–100K/user + hoa hồng</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 12px;border:0.5px solid #e5e3dc;font-size:11px;font-weight:700;color:#111">Khuyến nghị</td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center"><span style="background:#E6F1FB;color:#0C447C;border:0.5px solid #85B7EB;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600">Khả thi nhất</span></td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;border-left:2px solid #f97316"><span style="background:#fff3e0;color:#e65100;border:0.5px solid #f97316;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700">🏆 Top Pick</span></td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center"><span style="background:#EEEDFE;color:#3C3489;border:0.5px solid #AFA9EC;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600">Ambitious</span></td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center"><span style="background:#F1EFE8;color:#5F5E5A;border:0.5px solid #B4B2A9;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600">Dài hạn 5 năm+</span></td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center"><span style="background:#E6F1FB;color:#0C447C;border:0.5px solid #85B7EB;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600">Solid</span></td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;border-left:2px solid #f97316"><span style="background:#fff3e0;color:#e65100;border:0.5px solid #f97316;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700">🏆 Top Pick</span></td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center"><span style="background:#F1EFE8;color:#5F5E5A;border:0.5px solid #B4B2A9;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600">Thu hẹp scope</span></td>
+          <td style="padding:10px 8px;border:0.5px solid #e5e3dc;text-align:center;border-left:2px solid #f97316"><span style="background:#fff3e0;color:#e65100;border:0.5px solid #f97316;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700">🏆 Top Pick</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ======== TRANG 3: OUTLINE 8 ĐỀ TÀI ======== -->
+<div style="background:#fff;margin-top:4px;padding:48px 40px;font-family:'Be Vietnam Pro',sans-serif;border-top:1px solid #e5e3dc">
+  <div style="margin-bottom:40px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f97316;margin-bottom:6px">Trang 3 · Outline Đề Tài</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:#111;line-height:1.2">Outline <span style="color:#f97316">Đề Tài BIC</span> — 8 Ý Tưởng</h2>
+    <p style="font-size:13px;color:#6b7280;margin-top:6px">Cấu trúc trình bày gợi ý theo chuẩn BIC FPT MiniMBA 2026</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+
+    <!-- OUTLINE 01 -->
+    <div style="border:0.5px solid #e5e3dc;border-radius:12px;overflow:hidden">
+      <div style="background:#185FA5;padding:14px 18px">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 01 · Option 1</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT AI Revenue Engine</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px">Gói dịch vụ AI tăng doanh thu cho DN VN trong 90 ngày</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh & Vấn đề:</strong> 90% DN VN chưa ứng dụng AI vào tăng doanh thu, thiếu giải pháp đo được ROI cụ thể</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích thị trường:</strong> PEST + 5 Forces, phân tích 300K DN VN tiềm năng, đối thủ AWS/Google AI</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Giải pháp:</strong> 3 module AI (Sales Copilot, Customer Retention, Pricing Engine) — đóng gói từ năng lực FSoft</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Business Model Canvas:</strong> Kênh bán qua Ftel/Base, SaaS 50–200 tr/tháng, hỗ trợ onboarding 2 tuần</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 12 tháng:</strong> T1–3: MVP + pilot 5 KH; T4–6: ra mắt chính thức; T7–12: mở rộng 50 KH</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> Doanh thu 60–120 tỷ/năm, break-even tháng 6, margin 60%+</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> NPS khách hàng, ARR, churn rate; rủi ro: cạnh tranh Big Tech</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTLINE 02 -->
+    <div style="border:2px solid #f97316;border-radius:12px;overflow:hidden">
+      <div style="background:#f97316;padding:14px 18px;position:relative">
+        <div style="position:absolute;top:10px;right:12px;background:#fff;color:#f97316;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px">🏆 TOP PICK</div>
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 02 · Option 1</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT Ecosystem Monetization</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:3px">Kích hoạt 10M khách Ftel thành hệ sinh thái chi tiêu số</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh & Cơ hội:</strong> 10M thuê bao Ftel — tài sản ngủ quên, tương tác chỉ 1 lần/năm khi gia hạn</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích thị trường:</strong> So sánh MoMo/Grab/ZaloPay, PEST VN 2025, xu hướng superapp SEA</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Mô hình 2 lớp:</strong> Lớp 1 — Loyalty cross-sell xuyên FPT; Lớp 2 — Partner marketplace hoa hồng</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Business Model Canvas:</strong> Revenue stream đa chiều, đối tác điện/nước/bảo hiểm, AI personalization</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 12 tháng:</strong> T1–3: redesign app Ftel + tích hợp FRT/Education; T4–6: ra mắt loyalty; T7–12: marketplace</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> Kích hoạt 5% = 500K user; doanh thu 200–400 tỷ/năm từ tháng 6–9</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> MAU, ARPU, partner retention; rủi ro: cạnh tranh superapp đã established</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTLINE 03 -->
+    <div style="border:0.5px solid #e5e3dc;border-radius:12px;overflow:hidden">
+      <div style="background:#534AB7;padding:14px 18px">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 03 · Option 2</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT Agentic Workforce</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px">Đội nhân viên AI thay thế công việc lặp — xuất khẩu SEA</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh:</strong> Xu hướng AI Agent toàn cầu 2025 (Cognition, Salesforce Agentforce), VN chưa có đối thủ</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích nội bộ FPT:</strong> Mapping 10 quy trình lặp cao nhất tại FSoft/Base/Ftel có thể agent hóa</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Giải pháp:</strong> Xây "AI Agent Platform" — FSoft build, thí điểm nội bộ FPT, đóng gói bán ra ngoài</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Chiến lược tăng trưởng:</strong> Giai đoạn 1 nội bộ → Giai đoạn 2 DN VN → Giai đoạn 3 xuất khẩu SEA</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 18 tháng:</strong> T1–6: pilot nội bộ FPT; T7–12: bán cho 20 DN VN; T13–18: launch SEA</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> Tiết kiệm 200+ tỷ nội bộ + SaaS per-agent từ năm 2; margin 70%+</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> Tasks automated/day, cost saving %, agent uptime; rủi ro: thị trường VN chưa sẵn sàng</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTLINE 04 -->
+    <div style="border:0.5px solid #e5e3dc;border-radius:12px;overflow:hidden">
+      <div style="background:#5F5E5A;padding:14px 18px">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 04 · Option 1</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT Physical AI Hub</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px">Robot + AI vật lý cho nhà máy, logistics, y tế VN</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#F1EFE8;color:#444441;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh:</strong> 10K+ nhà máy FDI tại VN cần tự động hóa, không có vendor nội địa đủ tầm</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#F1EFE8;color:#444441;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích thị trường:</strong> Logistics automation VN 2025–2030, đối thủ Nhật/Hàn/TQ, lợi thế FPT</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#F1EFE8;color:#444441;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Giải pháp:</strong> FRT (thiết bị) + FSoft (AI/CV) + Ftel (IoT 5G) + Base (vận hành) — trọn gói</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#F1EFE8;color:#444441;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Focus thị trường:</strong> Thu hẹp vào 1 ngành — logistics kho vận (THACO, Vingroup, TH True Milk)</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#F1EFE8;color:#444441;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 24 tháng:</strong> T1–6: R&D + pilot 1 kho; T7–12: scale 5 kho; T13–24: mở rộng ngành khác</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#F1EFE8;color:#444441;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> Project fee 50–200 tỷ + subscription vận hành robot hàng tháng</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#F1EFE8;color:#444441;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> Robot uptime, cost saving/kho; rủi ro: đầu tư R&D lớn, chu kỳ bán hàng dài</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTLINE 05 -->
+    <div style="border:0.5px solid #e5e3dc;border-radius:12px;overflow:hidden">
+      <div style="background:#0F6E56;padding:14px 18px">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 05 · Option 3</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT Knowledge Brain</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px">Bách khoa toàn thư sống từ 45.000 nhân viên FPT</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh & Pain point:</strong> 90% tri thức thực chiến FPT chết khi nhân viên nghỉ việc, onboarding mất 3–6 tháng</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích hiện trạng:</strong> 7S nội bộ FPT, đánh giá hệ thống knowledge management hiện tại</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Giải pháp cải tiến:</strong> AI platform thu thập micro-knowledge + gamification + search engine nội bộ</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Mô hình mở rộng:</strong> Sau validate nội bộ → bán "Enterprise Knowledge Platform" cho 500+ tập đoàn VN</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 12 tháng:</strong> T1–3: build MVP; T4–6: pilot 2 BU FPT; T7–9: toàn FPT; T10–12: bán ngoài</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> Tiết kiệm onboarding 30% + SaaS B2B 50–200 tr/tháng/DN từ tháng 10</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> Knowledge entries/tháng, time-to-competency NV mới; rủi ro: adoption rate thấp</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTLINE 06 -->
+    <div style="border:2px solid #f97316;border-radius:12px;overflow:hidden">
+      <div style="background:#f97316;padding:14px 18px;position:relative">
+        <div style="position:absolute;top:10px;right:12px;background:#fff;color:#f97316;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px">🏆 TOP PICK</div>
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 06 · Option 1</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT Smart Home as a Service</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:3px">Gói nhà thông minh trọn gói subscription — không bán thiết bị</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh & Cơ hội:</strong> Smart home VN bùng nổ nhưng phân mảnh — không ai có trọn gói phần cứng + phần mềm + kết nối</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích thị trường:</strong> Smart home VN 2025–2030, phân khúc cao cấp vs phổ thông, đối thủ Xiaomi/Tuya</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Mô hình subscription:</strong> 2–5 tr/tháng = FRT lắp đặt IoT + Ftel kết nối + FSoft AI hub + bảo hành included</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Business Model Canvas:</strong> Gói Basic/Pro/Premium, upsell qua kênh Ftel 10M khách, đối tác chủ đầu tư BDS</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 12 tháng:</strong> T1–2: thiết kế gói + chuẩn bị kho thiết bị; T3–5: pilot 100 hộ; T6–12: scale 10K hộ</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> 10K hộ × 3 tr/tháng = 360 tỷ/năm; break-even tháng 8–10; margin 45%+</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> Churn rate, NPS, số hộ active; rủi ro: chi phí lắp đặt, cần đội kỹ thuật lớn</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTLINE 07 -->
+    <div style="border:0.5px solid #e5e3dc;border-radius:12px;overflow:hidden">
+      <div style="background:#854F0B;padding:14px 18px">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 07 · Option 2</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT Global Talent Exchange</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px">Xuất khẩu nhân lực tech VN — focus thị trường Nhật Bản</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh:</strong> Nhật thiếu 800K IT engineer 2030, FPT Software đã có uy tín tại thị trường Nhật</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích thị trường:</strong> IT labor market Nhật 2025, đối thủ TTS/Rikkeisoft, lợi thế FPT sẵn có</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Mô hình platform:</strong> AI match ứng viên → FPT Edu upskill tiếng Nhật/kỹ năng → hỗ trợ visa + EOR</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Chiến lược tăng trưởng:</strong> Focus Nhật năm 1 → mở rộng Đức/Úc năm 2 → UAE/Canada năm 3</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 18 tháng:</strong> T1–3: build platform; T4–6: ký 10 đối tác Nhật; T7–12: đặt 200 ứng viên đầu tiên</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> 15–20% lương năm đầu/ứng viên + EOR fee hàng tháng + phí upskilling</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> Số ứng viên placed/tháng, employer satisfaction; rủi ro: visa policy, pháp lý lao động</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTLINE 08 -->
+    <div style="border:2px solid #f97316;border-radius:12px;overflow:hidden">
+      <div style="background:#f97316;padding:14px 18px;position:relative">
+        <div style="position:absolute;top:10px;right:12px;background:#fff;color:#f97316;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px">🏆 TOP PICK</div>
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Ý tưởng 08 · Option 1</div>
+        <div style="font-size:15px;font-weight:700;color:#fff">FPT AI FinCoach</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:3px">Cố vấn tài chính AI cá nhân — từ 45K NV FPT đến 50M user VN</div>
+      </div>
+      <div style="padding:16px 18px;font-size:12px;color:#374151;line-height:1.7">
+        <div style="font-weight:700;color:#111;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Cấu trúc đề tài</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">1</span><span><strong>Bối cảnh & Cơ hội:</strong> 70% người VN không có kế hoạch tài chính, thuê tư vấn tốn 5–20 tr/buổi — chỉ người giàu mới dùng được</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">2</span><span><strong>Phân tích thị trường:</strong> Fintech VN 2025, đối thủ Finhay/MoMo, định vị "financial wellness" tránh rào cản license</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">3</span><span><strong>Giải pháp AI:</strong> Kết nối bank account → phân tích thói quen → đề xuất kế hoạch → tích hợp sản phẩm tài chính đối tác</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">4</span><span><strong>Business Model:</strong> Subscription 50–100K/tháng + hoa hồng bảo hiểm/quỹ + B2B gói HR benefit cho DN</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">5</span><span><strong>Lộ trình 12 tháng:</strong> T1–3: build + pilot 45K NV FPT; T4–6: ra mắt B2C; T7–12: B2B gói HR 50 DN</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">6</span><span><strong>Tài chính:</strong> 100K user × 75K/tháng = 90 tỷ/năm + hoa hồng; break-even tháng 9</span></div>
+          <div style="display:flex;gap:8px"><span style="background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;height:fit-content">7</span><span><strong>KPI & Rủi ro:</strong> MAU, savings rate cải thiện, hoa hồng/user; rủi ro: trust data tài chính, cần đối tác ngân hàng</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:32px;background:#f8f7f4;border-radius:12px;padding:20px 24px;border-left:4px solid #f97316">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#f97316;margin-bottom:8px">Lưu ý khi trình bày BIC</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;font-size:12px;color:#374151;line-height:1.6">
+      <div><strong style="color:#111">Yêu cầu đề tài:</strong> Thuộc phạm vi FPT · Có tính mới & thực tiễn · Không trùng khóa trước</div>
+      <div><strong style="color:#111">Quy trình phê duyệt:</strong> FCU Review → Adjust nếu cần → Approved. Nhóm đăng ký trước được ưu tiên khi trùng đề tài</div>
+      <div><strong style="color:#111">Công thức thành công:</strong> Pain point rõ ràng + Solution có FPT DNA + Số liệu thuyết phục + Lộ trình khả thi</div>
+    </div>
+  </div>
+</div>
+</body></html>
